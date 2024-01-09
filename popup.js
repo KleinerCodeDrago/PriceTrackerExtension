@@ -23,3 +23,10 @@ function updateButtonAndStatus() {
         status.textContent = 'Click the button to start element selection.';
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    browser.runtime.sendMessage({action: "getSelectorForCurrentTab"})
+        .then(response => {
+            document.getElementById('currentSelector').textContent = response.selector || 'No selector stored for this page.';
+        });
+});

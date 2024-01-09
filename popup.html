@@ -3,14 +3,39 @@
 <head>
   <title>Price Tracker</title>
   <style>
-    /* Your CSS styles */
+    body {
+      min-width: 357px;
+      overflow-x: hidden;
+    }
+
+    img {
+      margin: 5px;
+      border: 2px solid black;
+      vertical-align: middle;
+      width: 75px;
+      height: 75px;
+    }
+
+    #status {
+      white-space: pre;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 400px;
+    }
+
+    #currentSelector {
+      font-style: italic;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
-  <h1>Price Tracker</h1>
-  <button id="selectElement">Select an Element</button>
-  <p id="status">Click the button and select a price on the page.</p>
+    <h1>Price Tracker</h1>
+    <button id="selectElement">Select an Element</button>
+    <p id="status">Click the button to start element selection.</p>
+    <p id="currentSelector">Loading...</p>
 
-  <script src="popup.js"></script>
+    <script src="popup.js"></script>
 </body>
+</html>
 </html>
