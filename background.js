@@ -1,3 +1,9 @@
-console.log("Background script running");
+function storeSelector(url, selector) {
+    browser.storage.local.set({[url]: selector});
+}
 
-// Placeholder for future background logic, like checking prices
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "storeSelector") {
+        storeSelector(message.url, message.selector);
+    }
+});
