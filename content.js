@@ -26,6 +26,30 @@ function getPathTo(element) {
     return path;
 }
 
+document.addEventListener('click', function handler(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setTimeout(() => {
+        try {
+            let path = getPathTo(e.target);
+            let content = e.target.innerText;
+            console.log("Captured element:", e.target);
+            console.log("Captured content:", content);
+
+            browser.runtime.sendMessage({
+                action: "storeSelector",
+                url: window.location.href,
+                selector: path,
+                content: content
+            });
+        } catch (error) {
+            console.error("Error capturing content:", error);
+        }
+    }, 500); 
+
+    document.removeEventListener('click', handler);
+}, {once: true});
 
 function highlightElement(element) {
     const originalBorder = element.style.border;
