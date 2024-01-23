@@ -65,3 +65,46 @@ function getSelectorForCurrentTab(callback) {
         });
     });
 }
+
+
+function normalizeContent(content) {
+    let matches = content.match(/\d+([.,]\d+)?/);
+    return matches ? matches[0].replace(',', '.') : '';
+}
+
+function checkPrices() {
+    browser.storage.local.get(null, function(items) {
+        for (let url in items) {
+            let storedData = items[url];
+            fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const element = doc.querySelector(storedData.selector);
+                const currentContent = element ? normalizeContent(element.innerText) : '';
+
+                if (currentContent && currentContent !== normalizeContent(storedData.content)) {
+                    console.log(`Price change detected for ${url}`);
+                    storedData.content = currentContent;
+                    browser.storage.local.set({[url]: storedData});
+                    browser.notifications.create({
+                        "type": "basic",
+                        "iconUrl": browser.extension.getURL("icons/icon-48.png"),
+                        "title": "Price Change Detected",
+                        "message": `Price changed for ${url}`
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching the page:', error));
+        }
+    });
+}
+
+browser.alarms.create("checkPricesAlarm", { delayInMinutes: 1, periodInMinutes: 1 });
+browser.alarms.onAlarm.addListener(alarm => {
+    if (alarm.name === "checkPricesAlarm") {
+        checkPrices();
+    }
+});
+
