@@ -38,6 +38,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }).catch(error => {
             console.error("Error in receiving data:", error);
         });
+    updateWatchedPricesList();
 });
 
+function updateWatchedPricesList() {
+    browser.storage.local.get(null, function(items) {
+        const watchedPricesList = document.getElementById('watchedPricesList');
+        watchedPricesList.innerHTML = '';
+
+        for (let url in items) {
+            let item = items[url];
+            let div = document.createElement('div');
+            div.innerHTML = `
+                <p><strong>URL:</strong> ${url}</p>
+                <p><strong>Selector:</strong> ${item.selector}</p>
+                <p><strong>Current Price:</strong> ${item.content}</p>
+                <button class="deleteButton" data-url="${url}">Delete</button>
+            `;
+            watchedPricesList.appendChild(div);
+        }
+
+        document.querySelectorAll('.deleteButton').forEach(button => {
+            button.addEventListener('click', function() {
+                let urlToDelete = this.getAttribute('data-url');
+                browser.storage.local.remove(urlToDelete, function() {
+                    updateWatchedPricesList();
+                });
+            });
+        });
+    });
+}
 

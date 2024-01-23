@@ -3,13 +3,12 @@ function storeSelector(url, selector, content) {
     browser.storage.local.get(url).then(result => {
         let existingData = result[url] || {};
         if (content !== '') {
-            existingData.content = content;
+            existingData.content = normalizeContent(content);
         }
         existingData.selector = selector;
         browser.storage.local.set({[url]: existingData});
     });
 }
-
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "storeSelector") {
@@ -68,9 +67,20 @@ function getSelectorForCurrentTab(callback) {
 
 
 function normalizeContent(content) {
-    let matches = content.match(/\d+([.,]\d+)?/);
-    return matches ? matches[0].replace(',', '.') : '';
+    let numericContent = content.replace(/[^\d,.-]/g, '');
+
+    let lastCommaIndex = numericContent.lastIndexOf(',');
+    let lastDotIndex = numericContent.lastIndexOf('.');
+
+    if (lastCommaIndex > lastDotIndex) {
+        numericContent = numericContent.substring(0, lastCommaIndex).replace(/,/g, '') + '.' + numericContent.substring(lastCommaIndex + 1);
+    } else {
+        numericContent = numericContent.replace(/,/g, '');
+    }
+
+    return numericContent;
 }
+
 
 function checkPrices() {
     browser.storage.local.get(null, function(items) {
@@ -83,18 +93,19 @@ function checkPrices() {
                 const doc = parser.parseFromString(html, 'text/html');
                 const element = doc.querySelector(storedData.selector);
                 const currentContent = element ? normalizeContent(element.innerText) : '';
-
-                if (currentContent && currentContent !== normalizeContent(storedData.content)) {
-                    console.log(`Price change detected for ${url}`);
-                    storedData.content = currentContent;
-                    browser.storage.local.set({[url]: storedData});
-                    browser.notifications.create({
-                        "type": "basic",
-                        "iconUrl": browser.extension.getURL("icons/icon-48.png"),
-                        "title": "Price Change Detected",
-                        "message": `Price changed for ${url}`
-                    });
-                }
+                
+                //For next Issue
+                // if (currentContent && currentContent !== normalizeContent(storedData.content)) {
+                //     console.log(`Price change detected for ${url}`);
+                //     storedData.content = currentContent;
+                //     browser.storage.local.set({[url]: storedData});
+                //     browser.notifications.create({
+                //         "type": "basic",
+                //         "iconUrl": browser.extension.getURL("icons/icon-48.png"),
+                //         "title": "Price Change Detected",
+                //         "message": `Price changed for ${url}`
+                //     });
+                // }
             })
             .catch(error => console.error('Error fetching the page:', error));
         }
