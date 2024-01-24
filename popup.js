@@ -26,18 +26,16 @@ function updateButtonAndStatus() {
 
 document.addEventListener('DOMContentLoaded', function() {
     browser.runtime.sendMessage({action: "getSelectorForCurrentTab"})
-        .then(data => {
-            console.log("Data received in popup:", data);
-            if (data && 'selector' in data && 'content' in data) {
-                document.getElementById('currentSelector').textContent = 'Selector: ' + data.selector;
-                document.getElementById('selectedContent').textContent = 'Content: ' + data.content;
-            } else {
-                document.getElementById('currentSelector').textContent = 'No selector stored for this page.';
-                document.getElementById('selectedContent').textContent = 'No content captured';
-            }
-        }).catch(error => {
-            console.error("Error in receiving data:", error);
-        });
+    .then(data => {
+        console.log("Data received in popup:", data);
+        if (data && 'selector' in data && data.selector !== '') {
+        } else {
+            document.getElementById('currentSelector').textContent = 'No selector stored for this page.';
+            document.getElementById('selectedContent').textContent = 'No content captured';
+        }
+    }).catch(error => {
+        console.error("Error in receiving data:", error);
+    });
     updateWatchedPricesList();
 });
 

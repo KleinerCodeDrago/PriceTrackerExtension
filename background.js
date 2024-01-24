@@ -14,6 +14,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "storeSelector") {
         console.log("Received storeSelector message:", message);
         storeSelector(message.url, message.selector, message.content);
+    } else if (message.action === "getSelectorForCurrentTab") {
+        getSelectorForCurrentTab(function(data) {
+            sendResponse(data);
+        });
+        return true; // Keep the message channel open
     }
 });
 
@@ -30,24 +35,16 @@ function getSelectorForCurrentTab(callback) {
         const url = new URL(tabs[0].url);
         browser.storage.local.get(url.href, function(result) {
             const data = result[url.href];
-            if (data) {
-                callback({selector: data.selector, content: data.content});
+            if (data && data.selector) {
+                console.log("Sending data to popup:", data);
+                callback(data);
             } else {
+                console.log("No data found for this URL:", url.href);
                 callback({selector: '', content: ''});
             }
         });
     });
 }
-
-
-browser.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "getSelectorForCurrentTab") {
-        getSelectorForCurrentTab(function(data) {
-            sendResponse(data);
-        });
-        return true;
-    }
-});
 
 
 function getSelectorForCurrentTab(callback) {
@@ -64,7 +61,6 @@ function getSelectorForCurrentTab(callback) {
         });
     });
 }
-
 
 function normalizeContent(content) {
     let numericContent = content.replace(/[^\d,.-]/g, '');

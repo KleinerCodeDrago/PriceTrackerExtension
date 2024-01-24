@@ -1,3 +1,37 @@
+let isSelectingElement = false;
+
+function enableElementSelection() {
+    isSelectingElement = true;
+    document.addEventListener('click', elementSelectionHandler, {once: true});
+}
+
+function elementSelectionHandler(e) {
+    if (!isSelectingElement) {
+        return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    isSelectingElement = false;
+
+    let path = getPathTo(e.target);
+    highlightElement(e.target);
+
+    browser.runtime.sendMessage({
+        action: "storeSelector",
+        url: window.location.href,
+        selector: path,
+        content: e.target.innerText
+    });
+}
+
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "selectElement") {
+        enableElementSelection();
+    }
+});
+
+
 function getPathTo(element) {
     if (element.id) {
         return `#${element.id}`;
@@ -26,31 +60,6 @@ function getPathTo(element) {
     return path;
 }
 
-document.addEventListener('click', function handler(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    setTimeout(() => {
-        try {
-            let path = getPathTo(e.target);
-            let content = e.target.innerText;
-            console.log("Captured element:", e.target);
-            console.log("Captured content:", content);
-
-            browser.runtime.sendMessage({
-                action: "storeSelector",
-                url: window.location.href,
-                selector: path,
-                content: content
-            });
-        } catch (error) {
-            console.error("Error capturing content:", error);
-        }
-    }, 500); 
-
-    document.removeEventListener('click', handler);
-}, {once: true});
-
 function highlightElement(element) {
     const originalBorder = element.style.border;
     element.style.border = '2px solid red';
@@ -59,24 +68,3 @@ function highlightElement(element) {
         element.style.border = originalBorder;
     }, 2000);
 }
-
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "selectElement") {
-        document.addEventListener('click', function handler(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            let path = getPathTo(e.target);
-            highlightElement(e.target);
-            console.log("Selected Element CSS Path:", path);
-
-            browser.runtime.sendMessage({
-                action: "storeSelector",
-                url: window.location.href,
-                selector: path
-            });
-
-            document.removeEventListener('click', handler);
-        }, {once: true});
-    }
-});
