@@ -32,26 +32,14 @@ function retrieveSelector(url) {
 
 function getSelectorForCurrentTab(callback) {
     browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const url = new URL(tabs[0].url);
-        browser.storage.local.get(url.href, function(result) {
-            const data = result[url.href];
-            if (data && data.selector) {
-                console.log("Sending data to popup:", data);
-                callback(data);
-            } else {
-                console.log("No data found for this URL:", url.href);
-                callback({selector: '', content: ''});
-            }
-        });
-    });
-}
+        if (tabs.length === 0 || !tabs[0].url) {
+            callback({selector: '', content: ''}); // Frühzeitige Rückkehr, wenn keine gültige URL vorhanden ist
+            return;
+        }
 
-
-function getSelectorForCurrentTab(callback) {
-    browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const url = new URL(tabs[0].url);
-        browser.storage.local.get(url.href, function(result) {
-            const data = result[url.href];
+        const url = tabs[0].url;
+        browser.storage.local.get(url, function(result) {
+            const data = result[url];
             console.log("Sending data to popup:", data);
             if (data) {
                 callback(data);
@@ -61,6 +49,67 @@ function getSelectorForCurrentTab(callback) {
         });
     });
 }
+
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "initiateImport") {
+        browser.tabs.create({url: "import.html"});
+    }
+    // ... other cases
+});
+
+function getSelectorForCurrentTab(callback) {
+    browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        if (tabs.length === 0 || !tabs[0].url) {
+            callback({selector: '', content: ''}); // Frühzeitige Rückkehr, wenn keine gültige URL vorhanden ist
+            return;
+        }
+
+        const url = tabs[0].url; // Verwenden Sie die String-Version der URL
+        browser.storage.local.get(url, function(result) {
+            const data = result[url]; // Verwenden Sie die String-Version der URL
+            console.log("Sending data to popup:", data);
+            if (data) {
+                callback(data);
+            } else {
+                callback({selector: '', content: ''});
+            }
+        });
+    });
+}
+
+function importData(data) {
+    console.log("Importing data:", data);
+    browser.storage.local.clear(() => {
+        for (let url in data) {
+            if (data.hasOwnProperty(url)) {
+                let item = data[url];
+
+                // Überprüfen, ob item die erforderlichen Eigenschaften hat
+                if (item.hasOwnProperty('selector') && item.hasOwnProperty('content')) {
+                    let storageItem = {};
+                    storageItem[url] = item;
+                    browser.storage.local.set(storageItem).then(() => {
+                        console.log("Data imported for URL:", url);
+                    }).catch((error) => {
+                        console.error("Error setting data for URL:", url, error);
+                    });
+                } else {
+                    console.error("Invalid data format for URL:", url, item);
+                }
+            }
+        }
+    });
+}
+
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === "importData") {
+        importData(message.data);
+    }
+    // ... other cases
+});
+
 
 function normalizeContent(content) {
     let numericContent = content.replace(/[^\d,.-]/g, '');
@@ -81,6 +130,11 @@ function normalizeContent(content) {
 function checkPrices() {
     browser.storage.local.get(null, function(items) {
         for (let url in items) {
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                console.error('Invalid URL:', url);
+                continue;
+            }
+
             let storedData = items[url];
             fetch(url)
             .then(response => response.text())
@@ -91,22 +145,13 @@ function checkPrices() {
                 const currentContent = element ? normalizeContent(element.innerText) : '';
                 
                 //For next Issue
-                // if (currentContent && currentContent !== normalizeContent(storedData.content)) {
-                //     console.log(`Price change detected for ${url}`);
-                //     storedData.content = currentContent;
-                //     browser.storage.local.set({[url]: storedData});
-                //     browser.notifications.create({
-                //         "type": "basic",
-                //         "iconUrl": browser.extension.getURL("icons/icon-48.png"),
-                //         "title": "Price Change Detected",
-                //         "message": `Price changed for ${url}`
-                //     });
-                // }
+                // ... (rest of the code)
             })
             .catch(error => console.error('Error fetching the page:', error));
         }
     });
 }
+
 
 browser.alarms.create("checkPricesAlarm", { delayInMinutes: 1, periodInMinutes: 1 });
 browser.alarms.onAlarm.addListener(alarm => {

@@ -24,6 +24,24 @@ function updateButtonAndStatus() {
     }
 }
 
+document.getElementById('exportData').addEventListener('click', () => {
+    browser.storage.local.get(null, function(items) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "price_tracker_data.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    });
+});
+
+document.getElementById('importData').addEventListener('click', () => {
+    browser.runtime.sendMessage({action: "initiateImport"});
+});
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     browser.runtime.sendMessage({action: "getSelectorForCurrentTab"})
     .then(data => {

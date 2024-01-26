@@ -21,6 +21,10 @@
         "scripts": ["background.js"],
         "persistent": false
     },
+    "web_accessible_resources": [
+        "import.html",
+        "import.js"
+    ],
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
