@@ -18,7 +18,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         getSelectorForCurrentTab(function(data) {
             sendResponse(data);
         });
-        return true; // Keep the message channel open
+        return true;
     }
 });
 
@@ -33,7 +33,7 @@ function retrieveSelector(url) {
 function getSelectorForCurrentTab(callback) {
     browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
         if (tabs.length === 0 || !tabs[0].url) {
-            callback({selector: '', content: ''}); // Frühzeitige Rückkehr, wenn keine gültige URL vorhanden ist
+            callback({selector: '', content: ''});
             return;
         }
 
@@ -55,19 +55,18 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "initiateImport") {
         browser.tabs.create({url: "import.html"});
     }
-    // ... other cases
 });
 
 function getSelectorForCurrentTab(callback) {
     browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
         if (tabs.length === 0 || !tabs[0].url) {
-            callback({selector: '', content: ''}); // Frühzeitige Rückkehr, wenn keine gültige URL vorhanden ist
+            callback({selector: '', content: ''});
             return;
         }
 
-        const url = tabs[0].url; // Verwenden Sie die String-Version der URL
+        const url = tabs[0].url;
         browser.storage.local.get(url, function(result) {
-            const data = result[url]; // Verwenden Sie die String-Version der URL
+            const data = result[url];
             console.log("Sending data to popup:", data);
             if (data) {
                 callback(data);
@@ -85,7 +84,6 @@ function importData(data) {
             if (data.hasOwnProperty(url)) {
                 let item = data[url];
 
-                // Überprüfen, ob item die erforderlichen Eigenschaften hat
                 if (item.hasOwnProperty('selector') && item.hasOwnProperty('content')) {
                     let storageItem = {};
                     storageItem[url] = item;
@@ -107,7 +105,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "importData") {
         importData(message.data);
     }
-    // ... other cases
 });
 
 
@@ -144,8 +141,6 @@ function checkPrices() {
                 const element = doc.querySelector(storedData.selector);
                 const currentContent = element ? normalizeContent(element.innerText) : '';
                 
-                //For next Issue
-                // ... (rest of the code)
             })
             .catch(error => console.error('Error fetching the page:', error));
         }
