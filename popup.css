@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+#container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 300px;
+    margin: auto;
+}
+
+h1, h2 {
+    color: #2a9d8f;
+}
+
+button {
+    background-color: #2a9d8f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #21867a;
+}
+
+p {
+    line-height: 1.6;
+}
+
+#status {
+    margin-bottom: 20px;
+    color: #555;
+}
+
+#selectionInfo, #watchedPrices {
+    background-color: #eef6f6;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+#currentSelector, #selectedContent {
+    word-break: break-all;
+}

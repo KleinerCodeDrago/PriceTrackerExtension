@@ -1,43 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Price Tracker</title>
-  <style>
-    body {
-      min-width: 357px;
-      overflow-x: hidden;
-    }
-
-    img {
-      margin: 5px;
-      border: 2px solid black;
-      vertical-align: middle;
-      width: 75px;
-      height: 75px;
-    }
-
-    #status {
-      white-space: pre;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      max-width: 400px;
-    }
-
-    #currentSelector {
-      font-style: italic;
-      color: #aaa;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Element Selector</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <h1>Price Tracker</h1>
-  <button id="selectElement">Select an Element</button>
-  <p id="status">Click the button to start element selection.</p>
-  <p id="currentSelector">Loading...</p>
-  <p id="selectedContent"></p>
-
-  <script src="popup.js"></script>
+    <div id="container">
+        <h1>Element Selector</h1>
+        <button id="selectElement">Select an Element</button>
+        <p id="status">Click the button to start element selection.</p>
+        <div id="selectionInfo">
+            <h2>Current Selection</h2>
+            <p id="currentSelector">No selector stored for this page.</p>
+            <p id="selectedContent">No content captured</p>
+        </div>
+        <div id="watchedPrices">
+            <h2>Watched Prices</h2>
+            <div id="watchedPricesList"></div>
+        </div>
+        <div>
+            <button id="exportData">Export Data</button>
+            <button id="importData">Import Data</button>
+        </div>
+    </div>
+    <script src="popup.js"></script>
 </body>
-</html>
-</html>
 </html>
