@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
         console.log("Data received in popup:", data);
         if (data && 'selector' in data && data.selector !== '') {
+            document.getElementById('currentSelector').textContent = 'Current Selector: ' + data.selector;
+            document.getElementById('selectedContent').textContent = 'Selected Content: ' + (data.content || 'No content captured');
         } else {
             document.getElementById('currentSelector').textContent = 'No selector stored for this page.';
             document.getElementById('selectedContent').textContent = 'No content captured';
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     updateWatchedPricesList();
 });
+
 
 function updateWatchedPricesList() {
     browser.storage.local.get(null, function(items) {
